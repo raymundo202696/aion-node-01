@@ -7,75 +7,79 @@
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
         body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; padding: 20px; text-align: center; }
-        .price { font-size: 3rem; margin: 20px 0; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        button { background: transparent; color: #00ff41; border: 2px solid #00ff41; padding: 20px; width: 100%; font-weight: bold; border-radius: 8px; text-transform: uppercase; cursor: pointer; }
-        button:active { background: #00ff41; color: #000; }
-        #log { font-size: 0.7rem; text-align: left; margin-top: 20px; color: #888; border-left: 2px solid #222; padding-left: 10px; height: 100px; overflow-y: scroll; }
-        .success { color: #fff; font-weight: bold; }
+        .price { font-size: 2.5rem; margin: 20px 0; color: #fff; }
+        button { background: transparent; color: #00ff41; border: 2px solid #00ff41; padding: 20px; width: 100%; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        #log { font-size: 0.7rem; text-align: left; margin-top: 20px; color: #888; background: #111; padding: 10px; height: 150px; overflow-y: auto; border: 1px solid #333; }
+        .highlight { color: #fff; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div style="font-size: 0.6rem; color: #555;">[ SOVEREIGN PROTOCOL v1.4 ]</div>
-    <div class="price" id="price">FETCHING...</div>
+    <div style="font-size: 0.7rem;">[ ARCHITECT MODE: V1.5 ]</div>
+    <div class="price" id="price">SYNCING...</div>
     
-    <button id="connectBtn">ARM SYSTEM</button>
+    <button id="connectBtn">INITIALIZE HANDSHAKE</button>
     
-    <div id="log">> NODE INITIALIZED...<br>> WAITING FOR TRUST WALLET...</div>
+    <div id="log">> STANDBY...</div>
 
     <script>
-        const logger = (msg) => {
-            const logDiv = document.getElementById('log');
-            logDiv.innerHTML += `<br>> ${msg}`;
-            logDiv.scrollTop = logDiv.scrollHeight;
+        const log = (msg) => {
+            const l = document.getElementById('log');
+            l.innerHTML += `<br>> ${msg}`;
+            l.scrollTop = l.scrollHeight;
         };
 
-        async function connect() {
-            logger("Scanning for Provider...");
-            
-            // Try 1: Specific Trust Wallet object
-            // Try 2: Standard Ethereum object
-            const providerEntry = window.trustwallet?.ethereum || window.ethereum;
+        // THE 2026 DISCOVERY LOGIC
+        let detectedProvider = null;
 
-            if (providerEntry) {
-                try {
-                    logger("Provider found. Requesting handshake...");
-                    const provider = new ethers.providers.Web3Provider(providerEntry);
-                    
-                    // Request accounts
-                    await provider.send("eth_requestAccounts", []);
-                    const signer = provider.getSigner();
-                    const address = await signer.getAddress();
-                    
-                    logger(`<span class="success">LINKED: ${address.substring(0,10)}...</span>`);
-                    document.getElementById('connectBtn').innerText = "PILOT ONLINE";
-                    document.getElementById('connectBtn').style.borderColor = "#fff";
-                    document.getElementById('connectBtn').style.color = "#fff";
-                    
-                    // Trigger the $30 Monitor
-                    startSustainer(signer);
-                } catch (err) {
-                    logger("ERROR: User denied access.");
-                }
-            } else {
-                logger("CRITICAL: No Wallet Detected.");
-                alert("Trust Wallet not detected. Ensure you are using the Trust Wallet 'Browser' tab!");
+        window.addEventListener("eip6963:announceProvider", (event) => {
+            log(`Wallet Detected: <span class="highlight">${event.detail.info.name}</span>`);
+            detectedProvider = event.detail.provider;
+        });
+
+        // Trigger the discovery event
+        window.dispatchEvent(new Event("eip6963:requestProvider"));
+
+        async function armSystem() {
+            log("Arming system...");
+            
+            // Try EIP-6963 first, then window.trustwallet, then standard ethereum
+            const providerSource = detectedProvider || window.trustwallet?.ethereum || window.ethereum;
+
+            if (!providerSource) {
+                log("<span style='color:red;'>CRITICAL: Handshake Failed.</span>");
+                log("HINT: Are you using the 'Browser' tab in Trust Wallet?");
+                return;
+            }
+
+            try {
+                const provider = new ethers.providers.Web3Provider(providerSource);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const address = await signer.getAddress();
+                
+                log(`<span class="highlight">SUCCESS: Pilot Linked to ${address.slice(0,6)}...</span>`);
+                document.getElementById('connectBtn').innerText = "SYSTEM ONLINE";
+                
+                // INITIALIZE THE $30 BRAIN
+                startPilot(signer);
+            } catch (err) {
+                log("ERR: Handshake Rejected by Architect.");
             }
         }
 
         async function getPrice() {
-            try {
-                const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-                const data = await res.json();
-                document.getElementById('price').innerText = `$${parseFloat(data.price).toLocaleString()}`;
-            } catch(e) {}
+            const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+            const data = await res.json();
+            document.getElementById('price').innerText = `$${parseFloat(data.price).toLocaleString()}`;
         }
 
-        function startSustainer(signer) {
-            logger("Sustainer Engine: Starting...");
-            // Next we add the trade logic here
+        function startPilot(signer) {
+            log("Sustainer Engine: ONLINE.");
+            log("Targeting: $30 Hard Limit.");
+            // Next: We code the automated swap logic here.
         }
 
-        document.getElementById('connectBtn').onclick = connect;
+        document.getElementById('connectBtn').onclick = armSystem;
         setInterval(getPrice, 5000);
         getPrice();
     </script>
