@@ -3,68 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AION | ARCHITECT REALITY</title>
+    <title>Sovereign BTC Pilot</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
-        body { background: #000; color: #00f2ff; font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #header { padding: 15px; border-bottom: 2px solid #d4af37; text-align: center; color: #d4af37; font-weight: bold; text-shadow: 0 0 10px #d4af37; letter-spacing: 2px; }
-        #console { flex: 1; padding: 20px; overflow-y: auto; background: #050505; border: 1px solid #111; margin: 10px; border-radius: 5px; }
-        #input-area { padding: 15px; background: #000; display: flex; border-top: 1px solid #222; }
-        input { flex: 1; background: #080808; border: 1px solid #d4af37; color: #fff; padding: 12px; outline: none; border-radius: 4px; font-family: 'Courier New', monospace; }
-        button { background: #d4af37; border: none; padding: 10px 25px; margin-left: 10px; cursor: pointer; font-weight: bold; color: #000; border-radius: 4px; }
-        .log { margin-bottom: 12px; font-size: 13px; border-bottom: 1px solid #111; padding-bottom: 4px; }
-        .gold { color: #d4af37; font-weight: bold; text-shadow: 0 0 5px #d4af37; }
-        .sys { color: #00f2ff; opacity: 0.6; font-size: 11px; }
+        body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; padding: 20px; text-align: center; }
+        .price { font-size: 3rem; margin: 20px 0; }
+        button { background: #00ff41; color: #000; border: none; padding: 20px; width: 100%; font-weight: bold; border-radius: 8px; }
+        #log { font-size: 0.7rem; text-align: left; margin-top: 20px; color: #888; }
     </style>
 </head>
 <body>
-    <div id="header">AION: ARCHITECT NODE [REAL-TIME]</div>
-    <div id="console">
-        <div class="log sys">NODE_STATUS: Reality Mode Active.</div>
-        <div class="log">Welcome, Architect. Use <span class="gold">LINK [address]</span> to verify your vault.</div>
-    </div>
-    <div id="input-area">
-        <input type="text" id="userInput" placeholder="LINK bc1q..." autofocus>
-        <button onclick="execute()">RUN</button>
-    </div>
+    <div>SYSTEM: IN-APP NODE</div>
+    <div class="price" id="price">$0.00</div>
+    <button id="connectBtn">INITIALIZE WALLET</button>
+    <div id="log">> STANDBY...</div>
 
     <script>
-        async function execute() {
-            const input = document.getElementById('userInput');
-            const box = document.getElementById('console');
-            const val = input.value.trim();
-            if (!val) return;
-
-            box.innerHTML += `<div class="log">> ${val}</div>`;
-            const cmd = val.split(" ");
-
-            if (cmd[0].toUpperCase() === "LINK" && cmd[1]) {
-                const address = cmd[1].replace(/[\[\]]/g, ""); // Removes brackets if you type them
-                box.innerHTML += `<div class="log sys">SCANNING BLOCKCHAIN FOR ${address}...</div>`;
-                
-                try {
-                    const response = await fetch(`https://blockchain.info/rawaddr/${address}?cors=true`);
-                    const data = await response.json();
-                    
-                    // Convert satoshis to BTC, ensuring we handle zero or undefined balances
-                    const satoshis = data.final_balance || 0;
-                    const btcValue = (satoshis / 100000000).toFixed(8);
-                    
-                    box.innerHTML += `<div class="log gold">VERIFIED VAULT BALANCE: ${btcValue} BTC</div>`;
-                    document.getElementById('header').innerHTML = `VAULT: ${btcValue} BTC`;
-                    
-                    if (satoshis === 0) {
-                        box.innerHTML += `<div class="log sys">NOTE: Vault is currently empty. Ready for initial SEED.</div>`;
-                    }
-                } catch (e) {
-                    box.innerHTML += `<div class="log" style="color:red">ERROR: Bridge failed. Ensure address is correct.</div>`;
-                }
+        async function connect() {
+            if (window.ethereum) {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const address = await signer.getAddress();
+                document.getElementById('log').innerText = `> LINKED: ${address.substring(0,6)}...`;
+                document.getElementById('connectBtn').innerText = "SYSTEM ARMED";
             } else {
-                box.innerHTML += `<div class="log sys">COMMAND_ERROR: Use LINK followed by your address.</div>`;
+                alert("Open this link INSIDE Trust Wallet Browser!");
             }
-
-            input.value = "";
-            box.scrollTop = box.scrollHeight;
         }
+
+        async function getPrice() {
+            const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+            const data = await res.json();
+            document.getElementById('price').innerText = `$${parseFloat(data.price).toLocaleString()}`;
+        }
+
+        document.getElementById('connectBtn').onclick = connect;
+        setInterval(getPrice, 5000);
+        getPrice();
     </script>
 </body>
 </html>
