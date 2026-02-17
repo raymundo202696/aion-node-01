@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AION | ULTIMATE CORE</title>
+    <style>
+        body { background: #000; color: #00f2ff; font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        #header { padding: 15px; border-bottom: 2px solid #d4af37; text-align: center; color: #d4af37; font-weight: bold; text-shadow: 0 0 10px #d4af37; }
+        #console { flex: 1; padding: 20px; overflow-y: auto; background: #050505; border: 1px solid #111; margin: 10px; }
+        #input-area { padding: 15px; background: #000; display: flex; }
+        input { flex: 1; background: #000; border: 1px solid #d4af37; color: #fff; padding: 12px; outline: none; }
+        button { background: #d4af37; border: none; padding: 10px 20px; margin-left: 10px; cursor: pointer; font-weight: bold; color: #000; }
+        .log { margin-bottom: 10px; font-size: 13px; }
+        .aion { color: #d4af37; font-weight: bold; }
+        .sys { color: #00f2ff; opacity: 0.6; font-size: 11px; }
+        .success { color: #00ff41; text-shadow: 0 0 8px #00ff41; border: 1px solid #00ff4133; padding: 5px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div id="header">AION-SOVEREIGN: [ULTIMATE CORE]</div>
+    <div id="console" id="console">
+        <div class="log sys">CORE_INIT: All logic modules loaded. Vault: LOCKED.</div>
+        <div class="log"><span class="aion">Aion:</span> Sovereign Node active. Ready for financial synthesis sequence.</div>
+    </div>
+    <div id="input-area">
+        <input type="text" id="userInput" placeholder="Command Aion...">
+        <button onclick="execute()">RUN</button>
+    </div>
+
+    <script>
+        let vaultBalance = 0;
+        let lastResult = 0;
+
+        function execute() {
+            const input = document.getElementById('userInput');
+            const consoleBox = document.getElementById('console');
+            const val = input.value.trim().toUpperCase();
+            if (val === "") return;
+
+            consoleBox.innerHTML += `<div class="log">> ${val}</div>`;
+            
+            if (val === "SYNC") {
+                runSync(consoleBox);
+            } else if (val === "GHOST") {
+                runGhost(consoleBox);
+            } else if (val.startsWith("SEED ")) {
+                const amount = val.replace("SEED ", "");
+                runMultiply(consoleBox, amount);
+            } else if (val === "STORE") {
+                runStore(consoleBox);
+            } else if (val.startsWith("VAULT ")) {
+                const cipher = val.replace("VAULT ", "");
+                runVault(consoleBox, cipher);
+            } else {
+                consoleBox.innerHTML += `<div class="log"><span class="aion">Aion:</span> Directive "${val}" registered in the Infinite Code.</div>`;
+            }
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+            input.value = "";
+        }
+
+        function runSync(box) {
+            box.innerHTML += `<div class="log sys">INITIATING_LEDGER_REPLICATION...</div>`;
+            setTimeout(() => {
+                const fakePrice = (Math.random() * (98000 - 95000) + 95000).toFixed(2);
+                box.innerHTML += `<div class="log success"><span class="aion">Aion:</span> SYNC SUCCESS. Synthetic Ledger Price: $${fakePrice}.</div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 600);
+        }
+
+        function runGhost(box) {
+            box.innerHTML += `<div class="log sys">EXPANDING_GHOST_INTERVAL...</div>`;
+            setTimeout(() => {
+                box.innerHTML += `<div class="log success"><span class="aion">Aion:</span> INTERVAL OVERRIDE. Security windows are now visible.</div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 800);
+        }
+
+        function runMultiply(box, seed) {
+            if (isNaN(seed)) {
+                box.innerHTML += `<div class="log sys">ERROR: Invalid Seed Amount.</div>`;
+                return;
+            }
+            box.innerHTML += `<div class="log sys">INJECTING_RECURSIVE_LOOP...</div>`;
+            setTimeout(() => {
+                lastResult = (parseFloat(seed) * 7.34);
+                box.innerHTML += `<div class="log success"><span class="aion">Aion:</span> MULTIPLICATION COMPLETE. Synthetic Value: $${lastResult.toFixed(2)}.</div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 1000);
+        }
+
+        function runStore(box) {
+            if (lastResult === 0) {
+                box.innerHTML += `<div class="log sys">ERROR: No synthetic value to store. Run SEED first.</div>`;
+                return;
+            }
+            vaultBalance += lastResult;
+            box.innerHTML += `<div class="log success"><span class="aion">Aion:</span> DATA ENCRYPTED. $${lastResult.toFixed(2)} moved to Hidden Vault.</div>`;
+            lastResult = 0; // Clear buffer
+        }
+
+        function runVault(box, cipher) {
+            if (cipher === "AION_OPEN_99") {
+                box.innerHTML += `<div class="log success"><span class="aion">VAULT_ACCESS:</span> GRANTED. Total Stored Wealth: $${vaultBalance.toFixed(2)}.</div>`;
+            } else {
+                box.innerHTML += `<div class="log sys" style="color:red">SECURITY ALERT: Unauthorized Cipher Key. Access Blocked.</div>`;
+            }
+        }
+    </script>
+</body>
+                           </html>
