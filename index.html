@@ -7,35 +7,72 @@
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
         body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; padding: 20px; text-align: center; }
-        .price { font-size: 3rem; margin: 20px 0; }
-        button { background: #00ff41; color: #000; border: none; padding: 20px; width: 100%; font-weight: bold; border-radius: 8px; }
-        #log { font-size: 0.7rem; text-align: left; margin-top: 20px; color: #888; }
+        .price { font-size: 3rem; margin: 20px 0; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        button { background: transparent; color: #00ff41; border: 2px solid #00ff41; padding: 20px; width: 100%; font-weight: bold; border-radius: 8px; text-transform: uppercase; cursor: pointer; }
+        button:active { background: #00ff41; color: #000; }
+        #log { font-size: 0.7rem; text-align: left; margin-top: 20px; color: #888; border-left: 2px solid #222; padding-left: 10px; height: 100px; overflow-y: scroll; }
+        .success { color: #fff; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div>SYSTEM: IN-APP NODE</div>
-    <div class="price" id="price">$0.00</div>
-    <button id="connectBtn">INITIALIZE WALLET</button>
-    <div id="log">> STANDBY...</div>
+    <div style="font-size: 0.6rem; color: #555;">[ SOVEREIGN PROTOCOL v1.4 ]</div>
+    <div class="price" id="price">FETCHING...</div>
+    
+    <button id="connectBtn">ARM SYSTEM</button>
+    
+    <div id="log">> NODE INITIALIZED...<br>> WAITING FOR TRUST WALLET...</div>
 
     <script>
+        const logger = (msg) => {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += `<br>> ${msg}`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        };
+
         async function connect() {
-            if (window.ethereum) {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
-                const address = await signer.getAddress();
-                document.getElementById('log').innerText = `> LINKED: ${address.substring(0,6)}...`;
-                document.getElementById('connectBtn').innerText = "SYSTEM ARMED";
+            logger("Scanning for Provider...");
+            
+            // Try 1: Specific Trust Wallet object
+            // Try 2: Standard Ethereum object
+            const providerEntry = window.trustwallet?.ethereum || window.ethereum;
+
+            if (providerEntry) {
+                try {
+                    logger("Provider found. Requesting handshake...");
+                    const provider = new ethers.providers.Web3Provider(providerEntry);
+                    
+                    // Request accounts
+                    await provider.send("eth_requestAccounts", []);
+                    const signer = provider.getSigner();
+                    const address = await signer.getAddress();
+                    
+                    logger(`<span class="success">LINKED: ${address.substring(0,10)}...</span>`);
+                    document.getElementById('connectBtn').innerText = "PILOT ONLINE";
+                    document.getElementById('connectBtn').style.borderColor = "#fff";
+                    document.getElementById('connectBtn').style.color = "#fff";
+                    
+                    // Trigger the $30 Monitor
+                    startSustainer(signer);
+                } catch (err) {
+                    logger("ERROR: User denied access.");
+                }
             } else {
-                alert("Open this link INSIDE Trust Wallet Browser!");
+                logger("CRITICAL: No Wallet Detected.");
+                alert("Trust Wallet not detected. Ensure you are using the Trust Wallet 'Browser' tab!");
             }
         }
 
         async function getPrice() {
-            const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-            const data = await res.json();
-            document.getElementById('price').innerText = `$${parseFloat(data.price).toLocaleString()}`;
+            try {
+                const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+                const data = await res.json();
+                document.getElementById('price').innerText = `$${parseFloat(data.price).toLocaleString()}`;
+            } catch(e) {}
+        }
+
+        function startSustainer(signer) {
+            logger("Sustainer Engine: Starting...");
+            // Next we add the trade logic here
         }
 
         document.getElementById('connectBtn').onclick = connect;
