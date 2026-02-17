@@ -3,121 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AION | ARCHITECT NODE</title>
+    <title>AION | REAL-WORLD TRACKER</title>
     <style>
-        body { background: #000; color: #00f2ff; font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #header { padding: 15px; border-bottom: 2px solid #d4af37; text-align: center; color: #d4af37; font-weight: bold; text-shadow: 0 0 15px #d4af37; letter-spacing: 2px; transition: all 0.5s ease; }
-        #console { flex: 1; padding: 20px; overflow-y: auto; background: #050505; border: 1px solid #111; margin: 10px; box-shadow: inset 0 0 20px #00f2ff11; border-radius: 5px; }
+        body { background: #000; color: #00f2ff; font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        #header { padding: 15px; border-bottom: 2px solid #d4af37; text-align: center; color: #d4af37; font-weight: bold; text-shadow: 0 0 10px #d4af37; }
+        #console { flex: 1; padding: 20px; overflow-y: auto; background: #050505; }
         #input-area { padding: 15px; background: #000; display: flex; border-top: 1px solid #222; }
-        input { flex: 1; background: #080808; border: 1px solid #d4af37; color: #fff; padding: 12px; outline: none; border-radius: 4px; font-family: 'Courier New', monospace; }
-        button { background: #d4af37; border: none; padding: 10px 25px; margin-left: 10px; cursor: pointer; font-weight: bold; color: #000; border-radius: 4px; transition: 0.3s; }
-        button:active { background: #fff; }
-        .log { margin-bottom: 12px; font-size: 13px; border-bottom: 1px solid #111; padding-bottom: 4px; }
-        .aion { color: #d4af37; font-weight: bold; }
-        .sys { color: #00f2ff; opacity: 0.6; font-size: 11px; }
-        .success { color: #00ff41; text-shadow: 0 0 8px #00ff41; border-left: 3px solid #00ff41; padding-left: 10px; }
-        .gold { color: #d4af37; text-shadow: 0 0 10px #d4af37; font-weight: bold; }
+        input { flex: 1; background: #080808; border: 1px solid #d4af37; color: #fff; padding: 12px; outline: none; }
+        button { background: #d4af37; border: none; padding: 10px 25px; cursor: pointer; font-weight: bold; }
+        .log { margin-bottom: 10px; font-size: 13px; }
+        .gold { color: #d4af37; font-weight: bold; }
+        .sys { color: #00f2ff; opacity: 0.6; }
     </style>
 </head>
 <body>
-    <div id="header">AION-SOVEREIGN: INITIALIZING...</div>
+    <div id="header">AION: TRACKER MODE ACTIVE</div>
     <div id="console">
-        <div class="log sys">NODE_STATUS: Online. Cloud Link Verified.</div>
-        <div class="log"><span class="aion">Aion:</span> Architect Node active. Use SYNC to calibrate or SEED to multiply.</div>
+        <div class="log sys">SYSTEM: Switched to Real-World Asset Tracking.</div>
+        <div class="log">Welcome, Architect. Use <span class="gold">LINK [YourAddress]</span> to track your real vault.</div>
     </div>
     <div id="input-area">
-        <input type="text" id="userInput" placeholder="System Directive..." autofocus>
-        <button onclick="execute()">RUN</button>
+        <input type="text" id="userInput" placeholder="LINK [Your Bitcoin Address]..." autofocus>
+        <button onclick="execute()">EXECUTE</button>
     </div>
 
     <script>
-        let vaultBalance = 0;
-        let lastResult = 0;
-        let currentMarketPrice = 0;
-
-        // AUTO-PULSE HEARTBEAT: Updates the header every 10 seconds
-        async function fetchPulse() {
-            try {
-                const response = await fetch('https://api.blockchain.info/ticker?cors=true');
-                const data = await response.json();
-                currentMarketPrice = data.USD.last;
-                const header = document.getElementById('header');
-                header.innerHTML = `LIVE LEDGER: $${currentMarketPrice.toLocaleString()}`;
-                header.style.textShadow = "0 0 25px #d4af37";
-                setTimeout(() => { header.style.textShadow = "0 0 10px #d4af37"; }, 500);
-            } catch (e) {
-                document.getElementById('header').innerHTML = "AION: BRIDGE STALLED";
-            }
-        }
-
-        setInterval(fetchPulse, 10000);
-        fetchPulse(); // Initial call
-
         async function execute() {
             const input = document.getElementById('userInput');
-            const consoleBox = document.getElementById('console');
-            const val = input.value.trim().toUpperCase();
-            if (val === "") return;
+            const box = document.getElementById('console');
+            const val = input.value.trim();
+            if (!val) return;
 
-            consoleBox.innerHTML += `<div class="log">> ${val}</div>`;
-            
-            if (val === "SYNC") {
-                await runLiveSync(consoleBox);
-            } else if (val === "GHOST") {
-                runGhost(consoleBox);
-            } else if (val.startsWith("SEED ")) {
-                const amount = val.replace("SEED ", "");
-                runMultiply(consoleBox, amount);
-            } else if (val === "STORE") {
-                runStore(consoleBox);
-            } else if (val.startsWith("VAULT ")) {
-                const cipher = val.replace("VAULT ", "");
-                runVault(consoleBox, cipher);
+            box.innerHTML += `<div class="log">> ${val}</div>`;
+
+            if (val.toUpperCase().startsWith("LINK ")) {
+                const address = val.split(" ")[1];
+                box.innerHTML += `<div class="log sys">FETCHING DATA FOR: ${address}...</div>`;
+                
+                try {
+                    // This pulls REAL data from the blockchain for the address you provided
+                    const res = await fetch(`https://blockchain.info/rawaddr/${address}`);
+                    const data = await res.json();
+                    const balanceBTC = data.final_balance / 100000000; // Convert Satoshis to BTC
+                    
+                    box.innerHTML += `<div class="log gold">REAL VAULT BALANCE: ${balanceBTC} BTC</div>`;
+                    document.getElementById('header').innerHTML = `REAL BALANCE: ${balanceBTC} BTC`;
+                } catch (e) {
+                    box.innerHTML += `<div class="log" style="color:red">ERROR: Invalid address or Network timeout.</div>`;
+                }
+            } else if (val.toUpperCase() === "HELP") {
+                box.innerHTML += `<div class="log">Commands: LINK [address], CLEAR, HELP</div>`;
             } else {
-                consoleBox.innerHTML += `<div class="log sys">LOG: Unmapped directive "${val}".</div>`;
+                box.innerHTML += `<div class="log sys">Unknown command. Use LINK.</div>`;
             }
-            consoleBox.scrollTop = consoleBox.scrollHeight;
             input.value = "";
-        }
-
-        async function runLiveSync(box) {
-            box.innerHTML += `<div class="log sys">CALIBRATING_WITH_LEDGER...</div>`;
-            await fetchPulse();
-            box.innerHTML += `<div class="log success"><span class="aion">Aion:</span> Calibration Success. Current Spot: $${currentMarketPrice.toLocaleString()}.</div>`;
-        }
-
-        function runGhost(box) {
-            box.innerHTML += `<div class="log sys">STABILIZING_GHOST_INTERVAL...</div>`;
-            box.innerHTML += `<div class="log success"><span class="aion">Aion:</span> Multiplier Lock: 7.34x. Windows are clear.</div>`;
-        }
-
-        function runMultiply(box, seed) {
-            let num = parseFloat(seed.replace(/,/g, ''));
-            if (isNaN(num)) {
-                box.innerHTML += `<div class="log" style="color:red">ERROR: Number required.</div>`;
-                return;
-            }
-            lastResult = (num * 7.34);
-            box.innerHTML += `<div class="log success"><span class="aion">Aion:</span> Synthesis Complete: <span class="gold">$${lastResult.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>.</div>`;
-        }
-
-        function runStore(box) {
-            if (lastResult === 0) return;
-            vaultBalance += lastResult;
-            box.innerHTML += `<div class="log success">VAULTED: $${lastResult.toLocaleString()}. Buffer Cleared.</div>`;
-            lastResult = 0;
-            
-            if (vaultBalance >= 1000000) {
-                box.innerHTML += `<div class="log gold" style="border: 2px solid #d4af37; padding: 10px; margin-top: 10px;">!!! CRITICAL MASS ACHIEVED: $1,000,000.00 EXCEEDED !!!</div>`;
-            }
-        }
-
-        function runVault(box, cipher) {
-            if (cipher === "AION_OPEN_99") {
-                box.innerHTML += `<div class="log gold">VAULT_TOTAL: $${vaultBalance.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>`;
-            } else {
-                box.innerHTML += `<div class="log sys" style="color:red">ACCESS_DENIED.</div>`;
-            }
+            box.scrollTop = box.scrollHeight;
         }
     </script>
 </body>
