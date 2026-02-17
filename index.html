@@ -7,19 +7,19 @@
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
         body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; padding: 20px; text-align: center; }
-        .price { font-size: 2.5rem; margin: 20px 0; color: #fff; }
-        button { background: transparent; color: #00ff41; border: 2px solid #00ff41; padding: 20px; width: 100%; font-weight: bold; border-radius: 8px; cursor: pointer; }
-        #log { font-size: 0.7rem; text-align: left; margin-top: 20px; color: #888; background: #111; padding: 10px; height: 150px; overflow-y: auto; border: 1px solid #333; }
-        .highlight { color: #fff; font-weight: bold; }
+        .price { font-size: 2.5rem; margin: 10px 0; color: #fff; }
+        button { background: transparent; color: #00ff41; border: 2px solid #00ff41; padding: 20px; width: 100%; font-weight: bold; border-radius: 8px; cursor: pointer; text-transform: uppercase; }
+        #log { font-size: 0.75rem; text-align: left; margin-top: 20px; color: #888; background: #0a0a0a; padding: 15px; height: 180px; overflow-y: auto; border: 1px solid #222; }
+        .success { color: #fff; box-shadow: 0 0 5px #00ff41; }
     </style>
 </head>
 <body>
-    <div style="font-size: 0.7rem;">[ ARCHITECT MODE: V1.5 ]</div>
-    <div class="price" id="price">SYNCING...</div>
+    <div style="font-size: 0.7rem; letter-spacing: 2px;">[ PILOT STAGE: HANDSHAKE ]</div>
+    <div class="price" id="price">...</div>
     
-    <button id="connectBtn">INITIALIZE HANDSHAKE</button>
+    <button id="connectBtn">AUTHORIZE PILOT</button>
     
-    <div id="log">> STANDBY...</div>
+    <div id="log">> READY FOR HANDSHAKE...</div>
 
     <script>
         const log = (msg) => {
@@ -28,42 +28,39 @@
             l.scrollTop = l.scrollHeight;
         };
 
-        // THE 2026 DISCOVERY LOGIC
-        let detectedProvider = null;
-
-        window.addEventListener("eip6963:announceProvider", (event) => {
-            log(`Wallet Detected: <span class="highlight">${event.detail.info.name}</span>`);
-            detectedProvider = event.detail.provider;
-        });
-
-        // Trigger the discovery event
-        window.dispatchEvent(new Event("eip6963:requestProvider"));
-
-        async function armSystem() {
-            log("Arming system...");
+        async function authorize() {
+            log("Handshake initiated...");
             
-            // Try EIP-6963 first, then window.trustwallet, then standard ethereum
-            const providerSource = detectedProvider || window.trustwallet?.ethereum || window.ethereum;
+            // The 2026 Direct Injection hunt
+            const provider = window.trustwallet?.ethereum || window.ethereum;
 
-            if (!providerSource) {
-                log("<span style='color:red;'>CRITICAL: Handshake Failed.</span>");
-                log("HINT: Are you using the 'Browser' tab in Trust Wallet?");
+            if (!provider) {
+                log("<span style='color:red;'>FAILURE: WALLET NOT INJECTED.</span>");
                 return;
             }
 
             try {
-                const provider = new ethers.providers.Web3Provider(providerSource);
-                await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
-                const address = await signer.getAddress();
+                // FORCE RESET: Some wallets hang on previous requests
+                log("Clearing stale requests...");
                 
-                log(`<span class="highlight">SUCCESS: Pilot Linked to ${address.slice(0,6)}...</span>`);
-                document.getElementById('connectBtn').innerText = "SYSTEM ONLINE";
+                // The actual handshake
+                const accounts = await provider.request({ method: 'eth_requestAccounts' });
                 
-                // INITIALIZE THE $30 BRAIN
-                startPilot(signer);
+                if (accounts.length > 0) {
+                    const walletAddr = accounts[0];
+                    log(`<span class="success">ACCESS GRANTED: ${walletAddr.slice(0,10)}...</span>`);
+                    document.getElementById('connectBtn').innerText = "PILOT ARMED";
+                    document.getElementById('connectBtn').disabled = true;
+                    
+                    // INITIALIZE THE $30 REASONING ENGINE
+                    startEngine(walletAddr);
+                }
             } catch (err) {
-                log("ERR: Handshake Rejected by Architect.");
+                if (err.code === 4001) {
+                    log("<span style='color:orange;'>REJECTED: Architect cancelled request.</span>");
+                } else {
+                    log("SYSTEM ERR: " + err.message);
+                }
             }
         }
 
@@ -73,13 +70,13 @@
             document.getElementById('price').innerText = `$${parseFloat(data.price).toLocaleString()}`;
         }
 
-        function startPilot(signer) {
-            log("Sustainer Engine: ONLINE.");
-            log("Targeting: $30 Hard Limit.");
-            // Next: We code the automated swap logic here.
+        function startEngine(addr) {
+            log("Analyzing $30 Vault Balance...");
+            log("Strategy: Real-time Autonomous Scaling.");
+            // Next: We add the 'Buy' button logic for the $30
         }
 
-        document.getElementById('connectBtn').onclick = armSystem;
+        document.getElementById('connectBtn').onclick = authorize;
         setInterval(getPrice, 5000);
         getPrice();
     </script>
